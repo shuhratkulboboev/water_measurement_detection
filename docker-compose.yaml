@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  water-meter:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Ensures the correct Dockerfile is used
+    container_name: water-meter-detector
+    restart: unless-stopped
+    network_mode: host  # Uses host's network for RTSP and MQTT
+    environment:
+      - MQTT_BROKER=vizora.ddns.net  # MQTT Broker address
+      - MQTT_PORT=1883  # Port for MQTT connection
+      - MQTT_TOPIC=VITMMB09/JDN3HW  # Topic to publish data to
+      - TZ=Etc/UTC  # Set timezone to UTC (adjust if necessary)
+    volumes:
+      - ./model:/app/models  # Mount model directory
+      - ./images:/app/images  # Mount images directory
+      - ./videos:/app/videos  # Mount videos directory
+      - ./config:/app/config  # Optional: Mount config directory
+      - ./logs:/app/logs  # Optional: Mount logs directory for persistence
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"  # Limit log file size to 10MB
+        max-file: "3"  # Keep a maximum of 3 log files
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import cv2; print(cv2.__version__)\""]  # Health check to verify OpenCV version
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'  # CPU limits
+          memory: 1G  # Memory limits
+        reservations:
+          memory: 512M  # Reserved memory for the container
+
+  # Optional MQTT broker if you want to run your own
+  mqtt-broker:
+    image: eclipse-mosquitto  # Eclipse Mosquitto image for MQTT
+    container_name: mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"  # Expose MQTT port
+    volumes:
+      - ./mosquitto/config:/mosquitto/config  # Mount config directory for Mosquitto
+      - ./mosquitto/data:/mosquitto/data  # Mount data directory for Mosquitto
+      - ./mosquitto/log:/mosquitto/log  # Mount log directory for Mosquitto
+    environment:
+      - MOSQUITTO_USER=your_mqtt_user  # Optional: Set MQTT username
+      - MOSQUITTO_PASSWORD=your_mqtt_password  # Optional: Set MQTT password
+    networks:
+      - mqtt_network
+
+networks:
+  mqtt_network:  # Define a custom network for better isolation between services
+    driver: bridge
