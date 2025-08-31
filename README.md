@@ -1,4 +1,4 @@
-# 💧 Smart City Laboratory – Water Utility Meter Reading (Part 2)
+# 💧 Smart City Laboratory – Water Utility Meter Reading 
 
 [![Python](https://img.shields.io/badge/python-3.10-blue?logo=python)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/docker-24.0-blue?logo=docker)](https://www.docker.com/)
@@ -53,7 +53,7 @@ The system is fully containerized using **Docker** and orchestrated with **Docke
 ```bash
 git clone https://github.com/<your-username>/shuhratkulboboev.git
 cd shuhratkulboboev
-
+```
 
 ### 3️⃣ Build Docker Image
 
@@ -61,13 +61,13 @@ Build the Docker image for the water meter service:
 
 ```bash
 docker build -t water-meter-service .
-
+```
 4️⃣ Run with Docker Compose
 
 Start all containers using Docker Compose:
-
+```bash
 docker-compose up
-
+```
 
 This will start:
 
@@ -85,7 +85,7 @@ Reads frames from RTSP stream: rtsp://vizora.ddns.net:8554/watermeter
 Extracts meter digits (m³ resolution) using OpenCV / AI model
 
 Publishes readings as JSON payload:
-
+```bash
 { "meter": 123.456 }
 
 MQTT Broker
@@ -95,25 +95,26 @@ Host: vizora.ddns.net
 Port: 1883
 
 Topic: VITMMB09/<your-identifier>
-
+```
 You can use a custom identifier instead of your Neptun code for privacy. Document it in your report.
 
 🔄 Workflow
 
-Capture frame from RTSP stream
+- Capture frame from RTSP stream
 
-Extract meter digits using OpenCV / AI model
+- Extract meter digits using OpenCV / AI model
 
-Publish reading via MQTT
+- Publish reading via MQTT
 
-Repeat every 15 seconds
+- Repeat every 15 seconds
 
-Verify readings using an MQTT client
+- Verify readings using an MQTT client
 
 🧪 Testing
 
 Use 10.mp4 or 15.jpg for local testing
 
 Verify MQTT messages with:
-
+```bash
 mosquitto_sub -h vizora.ddns.net -p 1883 -t VITMMB09/<identifier>
+```
